@@ -11,7 +11,6 @@ void setup() {
 }
 
 void loop() {
-  delay(50); // Delay between pings for stability.
   unsigned int uS = sonar.ping(); // Send ping, get ping time in microseconds (uS).
   float distance = uS / US_ROUNDTRIP_CM; // Convert time into distance.
   
@@ -23,6 +22,5 @@ void loop() {
   Serial.println(uS);
 
   //. maybe we can measure it by adjusting frequency or puls duration 
-
   delay(1000); // Delay a second before next ping.
 }
