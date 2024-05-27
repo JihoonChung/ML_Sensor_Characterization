@@ -6,10 +6,10 @@
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
-const int numSamples = 100;
+const int numSamples = 200;
 unsigned int samples[numSamples];
 unsigned long sampleTimes[numSamples];
-int delayBetweenPings = 10; // Delay between pings in milliseconds
+double delayBetweenPings = 16000; // Delay between pings in microseconds
 
 void setup() {
   Serial.begin(9600); // Open serial connection at 9600 baud to output the distance.
@@ -33,16 +33,18 @@ void collectSamples() {
   memset(sampleTimes, 0, sizeof(sampleTimes));
 
   for (int i = 0; i < numSamples; i++) {
+    unsigned long startTime = micros();
     unsigned int uS = sonar.ping(); // Send ping, get ping time in microseconds (uS).
-    float distance = uS / US_ROUNDTRIP_CM; // Convert time into distance.
+    unsigned long endTime = micros();
+    unsigned long pingDuration = endTime - startTime;
+
     samples[i] = uS;
-    sampleTimes[i] = millis();
-    delay(delayBetweenPings); // Delay before next ping.
+    sampleTimes[i] = pingDuration;
+    delayMicroseconds(delayBetweenPings); // Delay before next ping.
   }
   printSamples();
   Serial.println("Sample collection complete.");
 }
-
 
 void printSamples() {
   for (int i = 0; i < numSamples; i++) {
@@ -60,22 +62,22 @@ void printSamples() {
 
 void increaseDelay() {
   if (delayBetweenPings < 20) {
-    delayBetweenPings += 1;
+    delayBetweenPings += 0.1;
     Serial.print("Delay between pings increased to: ");
     Serial.print(delayBetweenPings);
-    Serial.println(" ms");
+    Serial.println(" us");
   } else {
-    Serial.println("Delay is already at maximum (20 ms)");
+    Serial.println("Delay is already at maximum (20 us)");
   }
 }
 
 void decreaseDelay() {
   if (delayBetweenPings > 0) {
-    delayBetweenPings -= 1;
+    delayBetweenPings -= 0.1;
     Serial.print("Delay between pings decreased to: ");
     Serial.print(delayBetweenPings);
-    Serial.println(" ms");
+    Serial.println(" us");
   } else {
-    Serial.println("Delay is already at minimum (0 ms)");
+    Serial.println("Delay is already at minimum (0 us)");
   }
 }

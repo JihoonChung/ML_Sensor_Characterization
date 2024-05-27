@@ -6,10 +6,11 @@
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
-const int numSamples = 100;
+const int numSamples = 200;
 unsigned int samples[numSamples];
 unsigned long sampleTimes[numSamples];
-int delayBetweenPings = 10; // Delay between pings in milliseconds
+unsigned long delayBetweenPings = 16800; // Delay between pings in microseconds
+bool delayInMicroseconds = true; // Default delay is in microseconds
 
 void setup() {
   Serial.begin(9600); // Open serial connection at 9600 baud to output the distance.
@@ -20,10 +21,8 @@ void loop() {
     char command = Serial.read();
     if (command == 'R') {
       collectSamples();
-    } else if (command == 'u') {
-      increaseDelay();
-    } else if (command == 'd') {
-      decreaseDelay();
+    } else if (command == 'M' || command == 'U') {
+      setDelay(command);
     }
   }
 }
@@ -33,16 +32,25 @@ void collectSamples() {
   memset(sampleTimes, 0, sizeof(sampleTimes));
 
   for (int i = 0; i < numSamples; i++) {
+    unsigned long startTime = micros();
     unsigned int uS = sonar.ping(); // Send ping, get ping time in microseconds (uS).
-    float distance = uS / US_ROUNDTRIP_CM; // Convert time into distance.
+    
+
     samples[i] = uS;
-    sampleTimes[i] = millis();
-    delay(delayBetweenPings); // Delay before next ping.
+    
+    
+    if (delayInMicroseconds) {
+      delayMicroseconds(delayBetweenPings); // Delay in microseconds
+    } else {
+      delay(delayBetweenPings); // Delay in milliseconds
+    }
+    unsigned long endTime = micros();
+    unsigned long pingDuration = endTime - startTime;
+    sampleTimes[i] = pingDuration;
   }
   printSamples();
   Serial.println("Sample collection complete.");
 }
-
 
 void printSamples() {
   for (int i = 0; i < numSamples; i++) {
@@ -54,28 +62,31 @@ void printSamples() {
     Serial.print(",");
     Serial.print(samples[i]);
     Serial.print(",");
-    Serial.println(delayBetweenPings);
+    Serial.print(delayBetweenPings);
+    if (delayInMicroseconds) {
+      Serial.println(" us");
+    } else {
+      Serial.println(" ms");
+    }
   }
 }
 
-void increaseDelay() {
-  if (delayBetweenPings < 20) {
-    delayBetweenPings += 1;
-    Serial.print("Delay between pings increased to: ");
-    Serial.print(delayBetweenPings);
-    Serial.println(" ms");
-  } else {
-    Serial.println("Delay is already at maximum (20 ms)");
+void setDelay(char unit) {
+  while (Serial.available() == 0) {
+    // Wait for the user to input the delay value
   }
-}
-
-void decreaseDelay() {
-  if (delayBetweenPings > 0) {
-    delayBetweenPings -= 1;
-    Serial.print("Delay between pings decreased to: ");
-    Serial.print(delayBetweenPings);
-    Serial.println(" ms");
-  } else {
-    Serial.println("Delay is already at minimum (0 ms)");
+  int delayValue = Serial.parseInt();
+  if (unit == 'M') {
+    // If the unit is milliseconds
+    delayBetweenPings = delayValue;
+    delayInMicroseconds = false;
+  } else if (unit == 'U') {
+    // If the unit is microseconds
+    delayBetweenPings = delayValue;
+    delayInMicroseconds = true;
   }
+  Serial.print("Delay between pings set to: ");
+  Serial.print(delayBetweenPings);
+  Serial.print(" ");
+  Serial.println(unit == 'M' ? "milliseconds" : "microseconds");
 }
