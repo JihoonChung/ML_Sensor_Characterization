@@ -9,7 +9,6 @@ const float cmPerRevolution = 1.0; // Distance in cm per full revolution of the 
 int currentPositionCm = 0; // Current position of the stepper motor in cm
 bool buttonPressed = false;
 
-
 // Ultrasonic sensor definitions and setup
 #define TRIGGER_PIN  12  // Arduino pin tied to trigger pin on the ultrasonic sensor.
 #define ECHO_PIN     9   // Arduino pin tied to echo pin on the ultrasonic sensor.
@@ -69,7 +68,7 @@ void moveStepperSteps(int steps, int direction) {
   currentPositionCm += (direction == HIGH ? float(steps) * cmPerRevolution / stepsPerRevolution : -float(steps) * cmPerRevolution / stepsPerRevolution);
 }
 
-// Ultrasonic sensor 
+// Ultrasonic sensor
 void collectSamples() {
   // Reset sampleTimes array
   memset(sampleTimes, 0, sizeof(sampleTimes));
@@ -103,12 +102,14 @@ void printSamples() {
     Serial.print(",");
     Serial.print(samples[i]);
     Serial.print(",");
-    Serial.println(currentPositionCm);
+    Serial.print(currentPositionCm);
+    Serial.print(",");
+    Serial.println(delayBetweenPings);
   }
 }
 
 void runSequence() {
-  const float positionsCm[] = {0,5, 10,15, 20, 30}; // Example positions in cm
+  const float positionsCm[] = {0, 5, 10, 15, 20, 30}; // Example positions in cm
   const int numPositions = sizeof(positionsCm) / sizeof(positionsCm[0]);
 
   for (int i = 0; i < numPositions; i++) {
@@ -135,6 +136,12 @@ void setDelay(char command) {
   }
 }
 
+void updateDelay(unsigned long delay) {
+  delayBetweenPings = delay;
+  Serial.print("Delay updated to: ");
+  Serial.println(delayBetweenPings);
+}
+
 void processCommand(String command) {
   if (command.length() > 0) {
     if (command == "reset") {
@@ -143,6 +150,9 @@ void processCommand(String command) {
     } else if (command == "run") {
       Serial.println("Run sequence command received.");
       runSequence();
+    } else if (command.startsWith("D")) {
+      unsigned long delay = command.substring(1).toInt();
+      updateDelay(delay);
     } else {
       char directionChar = command[0];
       float rotations = command.substring(1).toFloat();
