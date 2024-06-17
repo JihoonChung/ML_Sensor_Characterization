@@ -2,12 +2,15 @@
 
 // Stepper motor definitions and setup
 const int stepPin = 3; // Stepper motor step pin
-const int dirPin = 4; // Stepper motor direction pin
-const int buttonPin = 2; // Button pin for reset
+const int dirPin = 2; // Stepper motor direction pin
+const int buttonPin = 5; // Button pin for reset
 const int stepsPerRevolution = 200; // Steps per revolution for the motor
 const float cmPerRevolution = 1.0; // Distance in cm per full revolution of the stepper motor
 int currentPositionCm = 0; // Current position of the stepper motor in cm
-bool buttonPressed = false;
+bool buttonPressed = false; // this switch act oppositly
+bool lastButtonState = false;
+unsigned long lastDebounceTime = 0; 
+unsigned long debounceDelay = 50; // 50 milliseconds debounce time
 
 // Ultrasonic sensor definitions and setup
 #define TRIGGER_PIN  12  // Arduino pin tied to trigger pin on the ultrasonic sensor.
@@ -16,7 +19,7 @@ bool buttonPressed = false;
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
-const int numSamples = 200;
+const int numSamples = 100;
 unsigned int samples[numSamples];
 unsigned long sampleTimes[numSamples];
 unsigned long delayBetweenPings = 16800; // Delay between pings in microseconds
@@ -27,10 +30,32 @@ void setup() {
   pinMode(dirPin, OUTPUT);
   pinMode(buttonPin, INPUT_PULLUP);
   Serial.begin(9600);
-  Serial.println("Stepper motor setup complete.");
+  //Serial.println("Stepper motor setup complete.");
+  //Serial.println("Resetting");
+  resetStepper();
+  //Serial.println("Type commands like 'F0.5' for forward rotation, 'R1.5' for reverse rotation, and 'reset' to reset the motor position.");
 }
 
 void loop() {
+  int reading = digitalRead(buttonPin); // Read the button state
+
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis(); // Reset the debouncing timer
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (reading != buttonPressed) {
+      buttonPressed = reading;
+      
+      if (!buttonPressed) { // Adjusted logic for flipped input
+        Serial.println("Button is pressed. Reverse rotation is disabled.");
+      } else {
+        Serial.println("Button is not pressed. Reverse rotation is enabled.");
+      }
+    }
+  }
+
+  lastButtonState = reading; // Update last button state
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n');
     processCommand(command);
@@ -50,8 +75,9 @@ void rotateStepper(int steps, int direction) {
 
 void resetStepper() {
   digitalWrite(dirPin, LOW); // Set the direction to backward
-  while (digitalRead(buttonPin) == HIGH) { // Adjusted logic for flipped input
+  while (!buttonPressed) { // Adjusted logic for flipped input
     rotateStepper(int(0.1 * stepsPerRevolution), LOW); // Rotate forward
+    buttonPressed = digitalRead(buttonPin); // Update button state
   }
   Serial.println("Reset complete, button pressed.");
   currentPositionCm = 0; // Reset position to zero
@@ -102,14 +128,18 @@ void printSamples() {
     Serial.print(",");
     Serial.print(samples[i]);
     Serial.print(",");
-    Serial.print(currentPositionCm);
+    Serial.print(26-currentPositionCm);
     Serial.print(",");
-    Serial.println(delayBetweenPings);
+    if (delayInMicroseconds){
+      Serial.println(delayBetweenPings);
+    }else{
+      Serial.println(delayBetweenPings * 1000);
+    }
   }
 }
 
 void runSequence() {
-  const float positionsCm[] = {0, 5, 10, 15, 20, 30}; // Example positions in cm
+  const float positionsCm[] = {0,2,4,6,8,9,10,11,12,13,14,15,16,17}; // Example positions in cm
   const int numPositions = sizeof(positionsCm) / sizeof(positionsCm[0]);
 
   for (int i = 0; i < numPositions; i++) {
@@ -138,8 +168,16 @@ void setDelay(char command) {
 
 void updateDelay(unsigned long delay) {
   delayBetweenPings = delay;
-  Serial.print("Delay updated to: ");
-  Serial.println(delayBetweenPings);
+  if (delayInMicroseconds){
+    Serial.print("Delay updated to: ");
+    Serial.print(delayBetweenPings);
+    Serial.println(" us");
+  }else{
+    Serial.print("Delay updated to: ");
+    Serial.print(delayBetweenPings);
+    Serial.println(" ms");
+  }
+  
 }
 
 void processCommand(String command) {
@@ -150,7 +188,15 @@ void processCommand(String command) {
     } else if (command == "run") {
       Serial.println("Run sequence command received.");
       runSequence();
-    } else if (command.startsWith("D")) {
+    } else if (command.startsWith("M")) {
+      delayInMicroseconds = false;
+      Serial.println("Delay set to milliseconds.");
+
+    } else if (command.startsWith("U")) {
+      delayInMicroseconds = true;
+      Serial.println("Delay set to microseconds.");
+    }
+    else if (command.startsWith("D")) {
       unsigned long delay = command.substring(1).toInt();
       updateDelay(delay);
     } else {
@@ -172,7 +218,7 @@ void processCommand(String command) {
           Serial.println("Rotating backward.");
           rotateStepper(steps, LOW); // Rotate backward if button is not pressed
           currentPositionCm -= float(steps) * cmPerRevolution / stepsPerRevolution; // Update current position in cm
-        } else if (directionChar == 'R' && buttonPressed) {
+        } else if (directionChar == 'R' && !buttonPressed) {
           Serial.println("Cannot rotate backward, button is pressed.");
         } else {
           Serial.println("Invalid direction command.");
