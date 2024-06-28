@@ -5,7 +5,7 @@ import datetime
 import os
 
 # Set up the serial connection (adjust '/dev/cu.usbserial-120' to your specific port)
-ser = serial.Serial('/dev/cu.usbserial-120', 9600, timeout=1)
+ser = serial.Serial('/dev/cu.usbserial-10', 9600, timeout=1)
 
 # Give the connection a second to settle
 time.sleep(2)
@@ -34,13 +34,13 @@ def get_user_defined_metadata():
 # Function to automatically generate filename for sequence recording
 def generate_sequence_filename(metadata):
     current_date = datetime.datetime.now().strftime("%H_%M_%S_%d%m%Y")
-    return f"fully_automate/data_v4/test_seq_ard{metadata['Arduino ID']}_sensor{metadata['Sensor ID']}_{current_date}.csv"
+    return f"ultra_sonic_sensor/fully_automate/data_v4/test_seq_ard{metadata['Arduino ID']}_sensor{metadata['Sensor ID']}_{current_date}.csv"
 
 # Function to record data
 def record_data(metadata, output_file):
     with open(output_file, 'w', newline='') as csvfile:
         fieldnames = [
-            'Trial', 'Ping Duration', 'Distance (cm)', 'Ping Time (us)', 'Delay (us)',
+            'Trial', 'Ping Duration', 'Distance (cm)', 'Ping Time (us)', 'Delay (us)','Steps',
             'Arduino ID', 'Sensor ID', 'Range (cm)', 'Sensor length (cm)', 'Color of sensor', 
             'Angle on XY plane', 'side a (cm)', 'side b (cm)', 'side c (cm)', 
             'Angle on YZ plane', 'Sensor Configuration', 'Sensor Angle', 
@@ -56,14 +56,15 @@ def record_data(metadata, output_file):
                 if line == "Sample collection complete.":
                     time.sleep(3)
                 data = line.split(',')
-                if len(data) == 6:  # Ensure we have all the parts of the data
+                if len(data) == 7:  # Ensure we have all the parts of the data
                     row = {
                         'Trial': data[0],
                         'Ping Duration': data[1],
                         'Distance (cm)': data[2],
                         'Ping Time (us)': data[3],
                         'Range (cm)': data[4],
-                        'Delay (us)': data[5],
+                        'Steps': data[5],
+                        'Delay (us)': data[6],
                     }
                     row.update(metadata)
                     writer.writerow(row)

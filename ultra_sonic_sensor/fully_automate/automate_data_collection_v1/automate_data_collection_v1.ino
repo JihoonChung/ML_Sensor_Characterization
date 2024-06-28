@@ -4,13 +4,15 @@
 const int stepPin = 3; // Stepper motor step pin
 const int dirPin = 2; // Stepper motor direction pin
 const int buttonPin = 5; // Button pin for reset
-const int stepsPerRevolution = 200; // Steps per revolution for the motor
+const int stepsPerRevolution = 262; // Steps per revolution for the motor
 const float cmPerRevolution = 1.0; // Distance in cm per full revolution of the stepper motor
 int currentPositionCm = 0; // Current position of the stepper motor in cm
 bool buttonPressed = false; // this switch act oppositly
 bool lastButtonState = false;
 unsigned long lastDebounceTime = 0; 
 unsigned long debounceDelay = 50; // 50 milliseconds debounce time
+
+int totalLen = 53;
 
 // Ultrasonic sensor definitions and setup
 #define TRIGGER_PIN  12  // Arduino pin tied to trigger pin on the ultrasonic sensor.
@@ -128,7 +130,9 @@ void printSamples() {
     Serial.print(",");
     Serial.print(samples[i]);
     Serial.print(",");
-    Serial.print(26-currentPositionCm);
+    Serial.print(totalLen-currentPositionCm);
+    Serial.print(",");
+    Serial.print(stepsPerRevolution*currentPositionCm);
     Serial.print(",");
     if (delayInMicroseconds){
       Serial.println(delayBetweenPings);
@@ -139,7 +143,7 @@ void printSamples() {
 }
 
 void runSequence() {
-  const float positionsCm[] = {0,2,4,6,8,9,10,11,12,13,14,15,16,17}; // Example positions in cm
+  const float positionsCm[] = {0,5,10,15,20,25,30,32,34,36,38,40}; // Example positions in cm
   const int numPositions = sizeof(positionsCm) / sizeof(positionsCm[0]);
 
   for (int i = 0; i < numPositions; i++) {

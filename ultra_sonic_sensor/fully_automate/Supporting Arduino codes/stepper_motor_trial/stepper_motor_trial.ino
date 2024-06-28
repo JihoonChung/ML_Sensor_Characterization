@@ -1,7 +1,7 @@
 int stepPin = 3;
 int dirPin = 2;
 int buttonPin = 4; // Assuming the button is connected to pin 4
-const int stepsPerRevolution = 200; // Adjust this value based on your stepper motor
+const int stepsPerRevolution = 245; // Adjust this value based on your stepper motor
 bool buttonPressed = false;
 bool lastButtonState = false;
 unsigned long lastDebounceTime = 0; 
