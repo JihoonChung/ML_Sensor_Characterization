@@ -6,7 +6,7 @@ const int dirPin = 2; // Stepper motor direction pin
 const int buttonPin = 5; // Button pin for reset
 const int stepsPerRevolution = 262; // Steps per revolution for the motor
 const float cmPerRevolution = 1.0; // Distance in cm per full revolution of the stepper motor
-int currentPositionCm = 0; // Current position of the stepper motor in cm
+float currentPositionCm = 0; // Current position of the stepper motor in cm
 bool buttonPressed = false; // this switch act oppositly
 bool lastButtonState = false;
 unsigned long lastDebounceTime = 0; 
@@ -22,7 +22,7 @@ int totalLen = 53;
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 const int numSamples = 100;
-unsigned int samples[numSamples];
+unsigned double samples[numSamples];
 unsigned long sampleTimes[numSamples];
 unsigned long delayBetweenPings = 16800; // Delay between pings in microseconds
 bool delayInMicroseconds = true; // Default delay is in microseconds
@@ -105,7 +105,7 @@ void collectSamples() {
     unsigned long startTime = micros();
     unsigned long uS = sonar.ping(); // Send ping, get ping time in microseconds (uS).
 
-    samples[i] = uS;
+    samples[i] = (double)uS;
 
     if (delayInMicroseconds) {
       delayMicroseconds(delayBetweenPings); // Delay in microseconds
