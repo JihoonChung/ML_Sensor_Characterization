@@ -161,6 +161,62 @@ void runSequence() {
 }
 
 
+//---------------------------------------------------
+// new automation 
+//---------------------------------------------------
+
+void printDelaySamples(unsigned long delay) {
+  for (int i = 0; i < numSamples; i++) {
+    Serial.print(i);
+    Serial.print(",");
+    Serial.print(sampleTimes[i]);
+    Serial.print(",");
+    Serial.print(samples[i] / US_ROUNDTRIP_CM);
+    Serial.print(",");
+    Serial.print(samples[i]);
+    Serial.print(",");
+    Serial.print(totalLen-currentPositionCm);
+    Serial.print(",");
+    Serial.print(stepsPerRevolution*currentPositionCm);
+    Serial.print(",");
+    Serial.println(delay);
+  }
+}
+
+void runDelaySequence() {
+  const float delays[] = {16800,10000,8000,6000,5000,3000,2000}; // delays in micro
+  const int numPositions = sizeof(positionsCm) / sizeof(positionsCm[0]);
+
+  for (int i = 0; i < delays; i++) {
+    float targetDelay = delays[i];
+    collectdelayedSamples(targetDelay);
+  }
+}
+
+void collectdelayedSamples(unsigned long delay) {
+  // Reset sampleTimes array
+  memset(sampleTimes, 0, sizeof(sampleTimes));
+
+  for (int i = 0; i < numSamples; i++) {
+    unsigned long startTime = micros();
+    unsigned long uS = sonar.ping(); // Send ping, get ping time in microseconds (uS).
+
+    samples[i] = (double)uS;
+
+    delayMicroseconds(delay); // Delay in microseconds
+
+    unsigned long endTime = micros();
+    unsigned long pingDuration = endTime - startTime;
+    sampleTimes[i] = pingDuration;
+  }
+  printSamples(delay);
+  Serial.println("Sample collection complete.");
+}
+
+
+//---------------------------------------------------
+
+
 void setDelay(char command) {
   if (command == 'M') {
     delayInMicroseconds = false;
@@ -185,19 +241,24 @@ void updateDelay(unsigned long delay) {
   
 }
 
+
 void processCommand(String command) {
   if (command.length() > 0) {
     if (command == "reset") {
       Serial.println("Reset command received. Moving backward until button is pressed.");
       resetStepper();
     } else if (command == "run") {
-      Serial.println("Run sequence command received.");
+      Serial.println("Run motor sequence command received.");
       runSequence();
     } else if (command.startsWith("M")) {
       delayInMicroseconds = false;
       Serial.println("Delay set to milliseconds.");
 
-    } else if (command.startsWith("U")) {
+    }else if (command == "P") { //new
+      Serial.println("Run Delay sequence command received.");
+      runDelaySequence();
+    }
+    else if (command.startsWith("U")) {
       delayInMicroseconds = true;
       Serial.println("Delay set to microseconds.");
     }
