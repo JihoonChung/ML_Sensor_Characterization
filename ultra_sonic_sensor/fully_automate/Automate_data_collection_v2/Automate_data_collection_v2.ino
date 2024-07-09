@@ -22,7 +22,7 @@ int totalLen = 53;
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 const int numSamples = 100;
-unsigned double samples[numSamples];
+unsigned long samples[numSamples];
 unsigned long sampleTimes[numSamples];
 unsigned long delayBetweenPings = 16800; // Delay between pings in microseconds
 bool delayInMicroseconds = true; // Default delay is in microseconds
@@ -185,9 +185,9 @@ void printDelaySamples(unsigned long delay) {
 
 void runDelaySequence() {
   const float delays[] = {16800,10000,8000,6000,5000,3000,2000}; // delays in micro
-  const int numPositions = sizeof(positionsCm) / sizeof(positionsCm[0]);
+  const int numDelays = sizeof(delays) / sizeof(delays[0]);
 
-  for (int i = 0; i < delays; i++) {
+  for (int i = 0; i < numDelays; i++) {
     float targetDelay = delays[i];
     collectdelayedSamples(targetDelay);
   }
@@ -209,7 +209,7 @@ void collectdelayedSamples(unsigned long delay) {
     unsigned long pingDuration = endTime - startTime;
     sampleTimes[i] = pingDuration;
   }
-  printSamples(delay);
+  printDelaySamples(delay);
   Serial.println("Sample collection complete.");
 }
 
