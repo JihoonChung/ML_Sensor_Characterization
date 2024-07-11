@@ -126,7 +126,7 @@ void printSamples() {
     Serial.print(",");
     Serial.print(sampleTimes[i]);
     Serial.print(",");
-    Serial.print(samples[i] / US_ROUNDTRIP_CM);
+    Serial.print((double)samples[i] / US_ROUNDTRIP_CM);
     Serial.print(",");
     Serial.print(samples[i]);
     Serial.print(",");
@@ -171,7 +171,7 @@ void printDelaySamples(unsigned long delay) {
     Serial.print(",");
     Serial.print(sampleTimes[i]);
     Serial.print(",");
-    Serial.print(samples[i] / US_ROUNDTRIP_CM);
+    Serial.print((double)samples[i] / US_ROUNDTRIP_CM);
     Serial.print(",");
     Serial.print(samples[i]);
     Serial.print(",");
