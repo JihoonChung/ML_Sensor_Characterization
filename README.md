@@ -1,4 +1,4 @@
-# Ultrasonic Sensor Characterization for Autonomous Cars
+# Sensor Characterization for Autonomous Cars
 
 ## Motivation
 
@@ -26,7 +26,7 @@ This GitHub repository contains the following:
 
 ## Getting Started
 
-To get started with this project, you can clone the repository and follow the instructions in the `README.md` files located in each folder. The `data_collection` folder contains detailed steps to set up and run the Arduino and Python scripts for data collection. The `analysis` folder contains Jupyter notebooks for the data analysis process.
+To get started with this project, you can clone the repository and follow the instructions in the `README.md` files located in each folder. The `ultra_sonic_sensor/fully_automate/data_v4.1.1` folder contains detailed steps to set up and run the Arduino and Python scripts for data collection. The `Analysis` folder contains Jupyter notebooks for the data analysis process.
 
 ## Conclusion
 
