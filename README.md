@@ -2,7 +2,7 @@
 
 ## Motivation
 
-This project aims to assist the University of Toronto's Mechatronics course ([MIE 444](#https://engineering.calendar.utoronto.ca/course/mie444h1)) students who are developing autonomous cars using sensors. Students have reported issues with sensors, particularly ultrasonic sensors. This feedback motivated us to undertake a project to characterize these sensors. Our goal is to cluster similar sensors, identify anomalies such as defective sensors, and ensure high-quality data collection. Additionally, this project will also benefit manufacturing companies like Magna, which rely on high-quality sensors for various applications in autonomous vehicles.
+This project aims to assist the University of Toronto's Mechatronics course ([MIE 444](https://engineering.calendar.utoronto.ca/course/mie444h1)) students who are developing autonomous cars using sensors. Students have reported issues with sensors, particularly ultrasonic sensors. This feedback motivated us to undertake a project to characterize these sensors. Our goal is to cluster similar sensors, identify anomalies such as defective sensors, and ensure high-quality data collection. Additionally, this project will also benefit manufacturing companies like Magna, which rely on high-quality sensors for various applications in autonomous vehicles.
 
 ## Project Overview
 
