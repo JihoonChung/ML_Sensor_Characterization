@@ -1,4 +1,4 @@
-# Sensor Characterization for Autonomous Cars
+# Sensor Characterization with Machine Learning
 
 ## Motivation
 
