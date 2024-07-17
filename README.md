@@ -1,4 +1,4 @@
-# Sensor Characterization with Machine Learning
+# Sensor Characterization w Machine Learning
 
 ## Motivation
 
