@@ -1,4 +1,4 @@
-# Sensor Characterization Project
+# Sensor Characterization w Machine Learning
 
 ## Motivation
 
