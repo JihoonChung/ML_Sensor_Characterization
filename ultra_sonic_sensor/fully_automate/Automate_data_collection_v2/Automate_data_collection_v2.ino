@@ -179,12 +179,12 @@ void printDelaySamples(unsigned long delay) {
     Serial.print(",");
     Serial.print(stepsPerRevolution*currentPositionCm);
     Serial.print(",");
-    Serial.println(delay);
+    Serial.println(delay*1000); // account for millisec
   }
 }
 
 void runDelaySequence() {
-  const float delays[] = {16800,10000,8000,6000,5000,3000,2000}; // delays in micro
+  const float delays[] = {20,15,10,5,2,1}; // delays in micro
   const int numDelays = sizeof(delays) / sizeof(delays[0]);
 
   for (int i = 0; i < numDelays; i++) {
@@ -203,7 +203,7 @@ void collectdelayedSamples(unsigned long delay) {
 
     samples[i] = (double)uS;
 
-    delayMicroseconds(delay); // Delay in microseconds
+    delays(delay); // Delay in 
 
     unsigned long endTime = micros();
     unsigned long pingDuration = endTime - startTime;
