@@ -184,7 +184,7 @@ void printDelaySamples(unsigned long delay) {
 }
 
 void runDelaySequence() {
-  const float delays[] = {20,15,10,5,2,1}; // delays in micro
+  const float delays[] = {10,5,2,1}; // delays in micro
   const int numDelays = sizeof(delays) / sizeof(delays[0]);
 
   for (int i = 0; i < numDelays; i++) {
