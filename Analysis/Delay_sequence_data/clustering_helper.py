@@ -520,3 +520,131 @@ def visualize_sensors_delay_side_by_side(sensors_to_compare, delays=[3000, 6000,
     )
 
     fig.show()
+
+
+
+from scipy.spatial.distance import cdist
+
+
+def find_and_visualize_closest_sensors(target_sensor_id, n=5, metric='euclidean', delays=[3000, 6000, 8000, 10000, 16800]):
+    """
+    Find the n closest sensors to a target sensor based on the specified distance metric and visualize them.
+    
+    Parameters:
+    - target_sensor_id (int): The ID of the target sensor.
+    - n (int): Number of closest sensors to find.
+    - metric (str): Distance metric to use ('euclidean' or 'cosine').
+    - delays (list): List of delays to compare.
+    """
+    # Load the dataset
+    file_path = '../processed_data/all_data_v4-1-1_cleaned_sensor211.csv'
+    all_cleaned_df = pd.read_csv(file_path)
+    all_cleaned_df = all_cleaned_df.drop("Unnamed: 0", axis=1)
+    
+    # Group by sensor ID, range, and delay, then calculate the mean and standard deviation of ping time
+    grouped_df = all_cleaned_df.groupby(['Sensor ID', 'Range (cm)', 'Delay (us)']).agg(
+        mean_ping_time=('Ping Time (us)', 'mean'),
+        std_ping_time=('Ping Time (us)', 'std')
+    ).reset_index()
+    
+    # Pivot the data to create feature vectors for each sensor
+    pivot_df = grouped_df.pivot_table(
+        index='Sensor ID', 
+        columns=['Delay (us)', 'Range (cm)'], 
+        values='mean_ping_time'
+    ).fillna(0)
+    
+    # Ensure the target sensor exists in the data
+    if target_sensor_id not in pivot_df.index:
+        print(f"Sensor ID {target_sensor_id} not found in the data.")
+        return
+    
+    # Extract feature vectors
+    sensor_ids = pivot_df.index.values
+    feature_vectors = pivot_df.values
+    
+    # Get the feature vector for the target sensor
+    target_vector = pivot_df.loc[target_sensor_id].values.reshape(1, -1)
+    
+    # Compute distances
+    distances = cdist(target_vector, feature_vectors, metric=metric).flatten()
+    
+    # Create a DataFrame of distances
+    distance_df = pd.DataFrame({
+        'Sensor ID': sensor_ids,
+        'Distance': distances
+    })
+    
+    # Remove the target sensor from the list
+    distance_df = distance_df[distance_df['Sensor ID'] != target_sensor_id]
+    
+    # Sort by distance and get the n closest sensors
+    closest_sensors_df = distance_df.sort_values('Distance').head(n)
+    closest_sensor_ids = closest_sensors_df['Sensor ID'].values.tolist()
+    
+    # Print the IDs of the n closest sensors
+    print(f"The {n} closest sensors to Sensor {target_sensor_id} based on {metric} distance are:")
+    for idx, row in closest_sensors_df.iterrows():
+        print(f"Sensor ID: {row['Sensor ID']}, Distance: {row['Distance']}")
+    
+    # Include the target sensor in the visualization
+    sensors_to_visualize = [target_sensor_id] + closest_sensor_ids
+    
+    # Use the existing visualization function
+    visualize_sensors_delay_side_by_side(sensors_to_visualize, delays)
+
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
+def visulaize_clustering_all(df,random_state=42, visualization_method='PCA', plot_3d=False):
+
+    # Standardize the features
+    df = df.copy()
+    sensor_ids = df.index if 'Sensor ID' not in df.columns else df['Sensor ID']
+    scaler = StandardScaler()
+    features_scaled = scaler.fit_transform(df.drop(columns=['Sensor ID']))
+
+
+    # Visualize the clustering results using PCA or t-SNE
+    if visualization_method.upper() == 'PCA':
+        n_components = 3 if plot_3d else 2
+        pca = PCA(n_components=n_components)
+        components = pca.fit_transform(features_scaled)
+        title = '3D Visualization using PCA' if plot_3d else '2D Visualization using PCA'
+    elif visualization_method.upper() == 'TSNE':
+        n_components = 3 if plot_3d else 2
+        tsne = TSNE(n_components=n_components, random_state=random_state)
+        components = tsne.fit_transform(features_scaled)
+        title = '3D Visualization using t-SNE' if plot_3d else '2D Visualization using t-SNE'
+    else:
+        raise ValueError("visualization_method should be either 'PCA' or 'TSNE'.")
+
+    # Create a DataFrame for the components
+    components_df = pd.DataFrame(components, columns=[f'Component {i+1}' for i in range(n_components)])
+    components_df['cluster'] = df['cluster'] 
+    components_df['Sensor ID'] = sensor_ids
+
+    # Plot the results
+    if plot_3d:
+        fig = px.scatter_3d(
+            components_df, 
+            x='Component 1', 
+            y='Component 2', 
+            z='Component 3', 
+            color='cluster', 
+            title=title,
+            hover_name='Sensor ID'  # Display Sensor ID on hover
+        )
+    else:
+        fig = px.scatter(
+            components_df, 
+            x='Component 1', 
+            y='Component 2', 
+            color='cluster', 
+            title=title,
+            hover_name='Sensor ID'  # Display Sensor ID on hover
+        )
+    
+    fig.show()

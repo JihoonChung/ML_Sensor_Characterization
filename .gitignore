@@ -4,3 +4,6 @@ ultra_sonic_sensor/Improved_usability/US_collect_data.py
 /ultra_sonic_sensor/Improved_usability/data_collection_v3.1/data_3.1
 ultra_sonic_sensor/.DS_Store
 
+Analysis/Delay_sequence_data/__pycache__/clustering_helper.cpython-310.pyc
+Analysis/Delay_sequence_data/__pycache__/clustering_helper_refactored.cpython-310.pyc
+Analysis/Delay_sequence_data/__pycache__/Kmeans_helper.cpython-310.pyc
