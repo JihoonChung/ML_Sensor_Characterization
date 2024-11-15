@@ -95,6 +95,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.metrics import silhouette_score
 import plotly.express as px
+from joblib import dump, load
 
 def train_KMeans(df, n_clusters=5, random_state=42, visualization_method='PCA', plot_3d=False):
     """
@@ -117,6 +118,7 @@ def train_KMeans(df, n_clusters=5, random_state=42, visualization_method='PCA', 
     sensor_ids = df.index if 'Sensor ID' not in df.columns else df['Sensor ID']
     scaler = StandardScaler()
     features_scaled = scaler.fit_transform(df.drop(columns=['Sensor ID']))
+    #dump(scaler, "best_models/final/scaler_final.joblib")
 
     # Fit a KMeans model
     kmeans = KMeans(n_clusters=n_clusters, random_state=random_state)
@@ -191,7 +193,7 @@ def train_KMeans(df, n_clusters=5, random_state=42, visualization_method='PCA', 
     
     fig.show()
 
-    return df, kmeans
+    return df, kmeans, scaler
 
 # Example usage:
 # df, kmeans = train_KMeans(df, n_clusters=5, random_state=42, visualization_method='PCA', plot_3d=True)

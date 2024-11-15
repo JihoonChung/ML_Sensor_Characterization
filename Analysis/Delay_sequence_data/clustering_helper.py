@@ -606,18 +606,24 @@ def visulaize_clustering_all(df,random_state=42, visualization_method='PCA', plo
     scaler = StandardScaler()
     features_scaled = scaler.fit_transform(df.drop(columns=['Sensor ID']))
 
-
     # Visualize the clustering results using PCA or t-SNE
     if visualization_method.upper() == 'PCA':
         n_components = 3 if plot_3d else 2
         pca = PCA(n_components=n_components)
         components = pca.fit_transform(features_scaled)
+        explained_variance = pca.explained_variance_ratio_  # Get explained variance ratio
         title = '3D Visualization using PCA' if plot_3d else '2D Visualization using PCA'
+        
+        # Define axis labels with explained variance for each component
+        axis_labels = [f'Component {i+1} ({explained_variance[i]:.2%} Variance)' for i in range(n_components)]
+
     elif visualization_method.upper() == 'TSNE':
         n_components = 3 if plot_3d else 2
         tsne = TSNE(n_components=n_components, random_state=random_state)
         components = tsne.fit_transform(features_scaled)
         title = '3D Visualization using t-SNE' if plot_3d else '2D Visualization using t-SNE'
+        axis_labels = [f'Component {i+1}' for i in range(n_components)]  # t-SNE does not have explained variance
+
     else:
         raise ValueError("visualization_method should be either 'PCA' or 'TSNE'.")
 
@@ -637,6 +643,12 @@ def visulaize_clustering_all(df,random_state=42, visualization_method='PCA', plo
             title=title,
             hover_name='Sensor ID'  # Display Sensor ID on hover
         )
+        fig.update_layout(scene=dict(
+            xaxis_title=axis_labels[0],
+            yaxis_title=axis_labels[1],
+            zaxis_title=axis_labels[2]
+        ))
+
     else:
         fig = px.scatter(
             components_df, 
@@ -646,5 +658,87 @@ def visulaize_clustering_all(df,random_state=42, visualization_method='PCA', plo
             title=title,
             hover_name='Sensor ID'  # Display Sensor ID on hover
         )
+        fig.update_layout(
+            xaxis_title=axis_labels[0],
+            yaxis_title=axis_labels[1]
+        )
+
+    fig.show()
+
+
+def visualize_aggregated_ping_time_with_variability(df, cluster=0, file_path='../processed_data/all_data_v4-1-1_cleaned_sensor211.csv'):
+    """
+    Visualize the effect of range on ping time aggregated across sensors for each delay, with variability shown as error bars.
+
+    Parameters:
+    df (DataFrame): The DataFrame containing clustered sensor data.
+    cluster (int): The cluster number to visualize.
+    file_path (str): The path to the full dataset for aggregation.
+    """
+    # Load and prepare data
+    all_cleaned_df = pd.read_csv(file_path).drop("Unnamed: 0", axis=1)
+    cluster_sensors = df[df["cluster"] == cluster]["Sensor ID"].unique()
+    cluster_df = all_cleaned_df[all_cleaned_df['Sensor ID'].isin(cluster_sensors)]
     
+    # Group by Delay and Range, then calculate the mean and standard deviation across sensors for Ping Time
+    aggregated_df = cluster_df.groupby(['Delay (us)', 'Range (cm)']).agg(
+        mean_ping_time=('Ping Time (us)', 'mean'),
+        std_ping_time=('Ping Time (us)', 'std')
+    ).reset_index()
+
+    # Get unique delays for plotting each delay as a separate subplot
+    unique_delays = aggregated_df['Delay (us)'].unique()
+
+    # Create subplots layout based on the number of unique delays
+    num_columns = 2  # Customize as needed
+    num_rows = -(-len(unique_delays) // num_columns)  # Calculate rows based on number of delays
+
+    fig = make_subplots(rows=num_rows, cols=num_columns, subplot_titles=[f'Delay: {delay} us' for delay in unique_delays])
+
+    for i, delay in enumerate(unique_delays):
+        subset_df = aggregated_df[aggregated_df['Delay (us)'] == delay]
+        
+        # Determine row and column for current subplot
+        row = (i // num_columns) + 1
+        col = (i % num_columns) + 1
+
+        # Plot the mean line with standard deviation as error bars
+        fig.add_trace(
+            go.Scatter(
+                x=subset_df['Range (cm)'],
+                y=subset_df['mean_ping_time'],
+                mode='lines+markers',
+                name=f'Delay {delay} us',
+                error_y=dict(
+                    type='data',
+                    array=subset_df['std_ping_time'],
+                    visible=True
+                )
+            ),
+            row=row, col=col
+        )
+
+        # Plot reference line (assuming 57 * range as the reference relationship)
+        ranges = np.linspace(subset_df['Range (cm)'].min(), subset_df['Range (cm)'].max(), 100)
+        reference_ping_times = 57 * ranges
+        fig.add_trace(
+            go.Scatter(
+                x=ranges,
+                y=reference_ping_times,
+                mode='lines',
+                line=dict(color='red', dash='dash'),
+                name='Reference Line'
+            ),
+            row=row, col=col
+        )
+
+    # Update layout for better presentation
+    fig.update_layout(
+        height=800,  # Adjust height for the grid layout
+        width=1200,  # Adjust width for the grid layout
+        showlegend=False,  # Set to True if you want a global legend
+        title_text=f"Aggregated Ping Time vs Range for Cluster {cluster} Across Delays",
+        template="plotly_white"
+    )
+
     fig.show()
