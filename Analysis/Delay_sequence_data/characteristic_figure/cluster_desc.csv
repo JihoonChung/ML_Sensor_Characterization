@@ -1,0 +1,14 @@
+﻿cluster,Refined Category,Description,Edge Case Sensitivity
+0,Conditionally Reliable,Performs well but deviates at specific delays and closer ranges; over-measurement in closer range consistently.,Range-Sensitive
+1,Defective Sensors,Deviates significantly in further ranges and at delay 16800 µs; erratic behaviour.,Range-Sensitive
+2,Conditionally Reliable,Reliable across delays but inconsistent at 16800 µs and most reliable at 3000 and 8000µs ; may need monitoring in high-delay settings. ,Delay-Sensitive
+3,Inconsistent Sensors,Generally consistent but unreliable at high delays (16800 µs) at close distances; calibration needed.,Range-Sensitive
+4,Defective Sensors,High variability at low and high delays; unsuitable for practical use.,Delay and Range-Sensitive
+5,Conditionally Reliable,Unreliable at high-delay conditions (16800 µs); stable in all other delay delays.,Delay and Range-Sensitive
+6,Inconsistent Sensors,Unreliability in high-delay settings. Generally over-measure in linear manner; calibration needed,Delay and Range-Sensitive
+7,Defective Sensors,"Does not exert linearity on all delays however, this is a lower sample cluster which may need monitoring while used.",Delay and Range-Sensitive
+8,Conditionally Reliable,"Stable for most delays but erratic behaviour at 10000 µs, particularly in shorter ranges. This is a lower sample cluster which may need monitoring while used.",Delay-Sensitive
+9,Conditionally Reliable,"Stable overall, but irregularity at 6000 µs introduces instability at shorter ranges. This is a lower sample cluster which may need monitoring while used.",Delay-Sensitive
+10,Conditionally Reliable,"Stable overall, but irregularity at 3000 and 6000 µs introduces instability at shorter ranges. This is a lower sample cluster which may need monitoring while used.",Delay-Sensitive
+11,Conditionally Reliable,Moderately unreliable at high-delay conditions (16800 µs) when the range is close to 13 to 18cm; stable in all other delay delays.,Delay-Sensitive
+12,Conditionally Reliable,Very unreliable at high-delay conditions (16800 µs) when the range is close to 13 to 18cm; stable in all other delay delays.,Delay-Sensitive

@@ -1,0 +1,5 @@
+====================
+Sensor ID: 197, Cluster: 3
+Refined Cluster: Inconsistent Sensors
+Edge Case Sensitivity: Range-Sensitive
+Description: Generally consistent but unreliable at high delays (16800 µs) at close distances; calibration needed.
