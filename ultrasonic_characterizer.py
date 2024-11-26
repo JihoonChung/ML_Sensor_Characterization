@@ -188,14 +188,14 @@ def display_cluster_figures(cluster_num, refined_category, edge_case_sensitivity
 
 
 if __name__ == '__main__':
-    file_path = f"{script_dir}/Analysis/Delay_sequence_data/processed_data/all_data_v4-1-1_cleaned_sensor211.csv"
+    file_path = f"{script_dir}/Analysis/processed_data/all_data_v4-1-1_cleaned_sensor211.csv"
     print(file_path)
     df_data_v4_1_1 = pd.read_csv(file_path)
     df_range_delay_all = feature_engineering_quartile_means(df_data_v4_1_1)
     df_range_delay_all = df_range_delay_all.sample(n=3)
     predicted_cluster = predict_KMeans(df_range_delay_all)
 
-    df_characterization = pd.read_csv(f"{script_dir}/characteristic_figure/cluster_desc.csv") 
+    df_characterization = pd.read_csv(f"{script_dir}/Analysis/Delay_sequence_data/characteristic_figure/cluster_desc.csv") 
     
     with pd.option_context('display.max_colwidth', None):
         for _, row in predicted_cluster.iterrows():
